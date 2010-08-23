@@ -34,9 +34,18 @@ instance Javascript Simple
 	    , unP block
 	    , "}\n"
 	    ]
+	ifelse test block1 block2 = 
+	  P $ concat
+	    [ "if (", unE test, ") {\n"
+	    , unP block1
+	    , "} else {\n"
+	    , unP block2
+	    , "}\n"
+	    ]
 	assignMethodCallResult var obj method args = assign var $ callMethodPrimitive obj method args
 	declareMethodCallResult var obj method args = declare var $ callMethodPrimitive obj method args
 	callMethod obj method args = P $ concat [unE $ callMethodPrimitive obj method args, ";\n"]
+	callMethodE obj method args = E $ concat [unE $ callMethodPrimitive obj method args, ";\n"]
 	assignFunctionCallResult var func args = assign var $ callFunctionPrimitive func args
 	declareFunctionCallResult var func args = declare var $ callFunctionPrimitive func args
 	callFunction func args = P $ concat [unE $ callFunctionPrimitive func args, ";\n"]
@@ -57,7 +66,10 @@ instance Javascript Simple
 		caseP :: Expression Simple -> Simple -> Prelude.String
 		caseP (E expr) (P prog) = concat ["case ", expr, ":\n", prog]
 	subscript a i = E $ concat [unE a, "[", unE i, "]"]
-        unsafeStringToExpression = E
+	binaryOp op e1 e2 = E $ concat ["(", unE e1, ")", op, "(", unE e2, ")"]
+	unaryOp op e1 = E $ concat [op, "(", unE e1, ")"]
+	unsafeStringToExpression = E
+	unsafeStringToP = P
 
 callMethodPrimitive :: Expression Simple -> Id -> [Expression Simple] -> Expression Simple
 callMethodPrimitive obj method args = E $ concat [unE obj, ".", method, "(", intercalate ", " . map unE $ args, ")"]

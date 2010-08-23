@@ -22,9 +22,11 @@ class Monoid js => Javascript js
         bool :: Bool -> Expression js
         not :: Expression js -> Expression js
         if_ :: Expression js -> js -> js
+        ifelse :: Expression js -> js -> js -> js
         assignMethodCallResult :: Expression js -> Expression js -> Id -> [Expression js] -> js
         declareMethodCallResult :: Id -> Expression js -> Id -> [Expression js] -> js
         callMethod :: Expression js -> Id -> [Expression js] -> js
+        callMethodE :: Expression js -> Id -> [Expression js] -> Expression js
         assignFunctionCallResult :: Expression js -> Expression js -> [Expression js] -> js
         declareFunctionCallResult :: Id -> Expression js -> [Expression js] -> js
         callFunction :: Expression js -> [Expression js] -> js
@@ -37,9 +39,12 @@ class Monoid js => Javascript js
         new :: Expression js -> [Expression js] -> Expression js
         switch :: Expression js -> Maybe js -> [(Expression js, js)] -> js
         subscript :: Expression js -> Expression js -> Expression js
-        
+        binaryOp :: Prelude.String -> Expression js -> Expression js -> Expression js
+        unaryOp :: Prelude.String -> Expression js -> Expression js 
+
         -- FIXME: totally hack. Far cry for removal.
         unsafeStringToExpression :: String -> Expression js
+        unsafeStringToP :: String -> js
 
 assignProperty :: (Javascript js) => Expression js -> Id -> Expression js -> js
 assignProperty object prop value = assign (property object prop) value

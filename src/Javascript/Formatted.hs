@@ -55,12 +55,24 @@ instance Javascript Formatted
 	       indent $ unP block
                newLine
 	       tell "}"
+	ifelse test block1 block2 = P $
+	    do newLine
+               tell "if ("
+               unE test
+               tell ") {"
+	       indent $ unP block1
+               newLine
+	       tell "} else {"
+	       indent $ unP block2
+               newLine
+	       tell "}"
 	assignMethodCallResult var obj method args = assign var $ callMethodPrimitive obj method args
 	declareMethodCallResult var obj method args = declare var $ callMethodPrimitive obj method args
 	callMethod obj method args = P $
           do newLine
              unE $ callMethodPrimitive obj method args
              tell ";"
+	callMethodE obj method args = callMethodPrimitive obj method args
 	assignFunctionCallResult var func args = assign var $ callFunctionPrimitive func args
 	declareFunctionCallResult var func args = declare var $ callFunctionPrimitive func args
 	callFunction func args = P $
@@ -129,7 +141,18 @@ instance Javascript Formatted
              tell "["
              unE i
              tell "]"
-        unsafeStringToExpression = E . tell
+	unsafeStringToExpression = E . tell
+	unsafeStringToP = P . tell
+	binaryOp op e1 e2 = E $
+          do tell "("
+             unE e1
+             tell $ ") " ++ op ++ " ("
+             unE e2
+             tell ")"
+	unaryOp op e1 = E $
+          do tell $ op ++ "("
+             unE e1
+             tell ")"
 
 callMethodPrimitive :: Expression Formatted -> Id -> [Expression Formatted] -> Expression Formatted
 callMethodPrimitive obj method args = E $

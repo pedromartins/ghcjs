@@ -79,7 +79,12 @@ expression (StgConApp con args) =
     , Js.return . Js.var $ "$res"
     ]
 expression (StgOpApp (StgFCallOp f g) args _ty) = Js.return $ foreignFunctionCall f g args
-expression (StgOpApp (StgPrimOp op) args _ty) = Js.return $ primitiveOperation op args
+expression (StgOpApp (StgPrimOp op) args _ty) = 
+    mconcat 
+     [ Js.declare "$res" Js.null
+     , (primitiveOperation (Js.var "$res") op args)
+     , Js.return . Js.var $ "$res"
+     ]
 expression (StgOpApp (StgPrimCallOp call) args _ty) = Js.return $ primitiveCall call args
 expression (StgLam{}) = panic "unexpected StgLam" -- StgLam is used *only* during CoreToStg's work (StgSyn.lhs:196)
 
@@ -109,7 +114,11 @@ caseExpressionScrut binder expr = go expr
           where name = stgIdToJs f
         go (StgLit lit) = stgIdToJsDecl binder $ stgLiteralToJs $ lit
         go (StgOpApp (StgFCallOp f g) args _ty) = stgIdToJsDecl binder $ foreignFunctionCall f g args
-        go (StgOpApp (StgPrimOp op) args _ty) = stgIdToJsDecl binder $ primitiveOperation op args
+        go (StgOpApp (StgPrimOp op) args _ty) = 
+            mconcat
+             [ stgIdToJsDecl binder Js.null
+             , (primitiveOperation (stgIdToJs binder) op args)
+             ]
         go (StgOpApp (StgPrimCallOp call) args _ty) = stgIdToJsDecl binder $ primitiveCall call args
         go e = stgIdToJsDeclareFunctionCallResult binder f []
           where f = Js.function [] (expression e)

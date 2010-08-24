@@ -5,7 +5,7 @@ import Data.Monoid (mconcat)
 
 import Panic (panic)
 
-import DataCon as Stg (DataCon, dataConTag)
+import DataCon as Stg (dataConTag)
 import Id as Stg (Id)
 import CoreSyn as Stg (AltCon (DataAlt, LitAlt, DEFAULT))
 import StgSyn as Stg
@@ -52,9 +52,6 @@ definition id (StgRhsClosure _cc _bi _fvs upd_flag _srt args body) =
         evalFunctionName
           | isUpdatable upd_flag = "evaluateOnce"
           | otherwise = "evaluate"
-
-dataCreation :: Javascript js => DataCon -> Expression js
-dataCreation con = Js.new (Js.property haskellRoot "Data") [Js.int (dataConTag con)]
 
 dataEvaluation :: Javascript js => Expression js -> [Expression js] -> js
 dataEvaluation object args =

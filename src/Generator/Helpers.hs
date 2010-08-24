@@ -1,9 +1,7 @@
 {-# LANGUAGE TypeFamilies #-}
 module Generator.Helpers where
 
-import Data.Maybe (isJust, fromJust)
-import Id as Stg (Id, isDataConId_maybe)
-import DataCon as Stg (DataCon, dataConTag)
+import Id as Stg (Id)
 import Name (NamedThing (getName, getOccName), nameModule, isExternalName)
 import OccName (occNameString)
 import Unique (Uniquable (getUnique), getKey)
@@ -31,14 +29,9 @@ stgModuleToJs mod = haskellRoot $. "modules" $. (zEncodeString . moduleNameStrin
 
 stgIdToJs :: Javascript js => Stg.Id -> Expression js
 stgIdToJs id
-  | isJust maybeDCon = dataCreation . fromJust $ maybeDCon 
   | isExternalId id = Js.property (stgModuleToJs . nameModule . getName $ id) nameStr
   | otherwise = Js.var . stgIdToJsId $ id
   where nameStr = ("hs_"++) . zEncodeString . occNameString . getOccName $ id
-        maybeDCon = isDataConId_maybe id
-
-dataCreation :: Javascript js => DataCon -> Expression js
-dataCreation con = Js.new (Js.property haskellRoot "Data") [Js.int (dataConTag con)]
 
 stgIdToJsId :: Stg.Id -> Js.Id
 stgIdToJsId id = name ++ key
